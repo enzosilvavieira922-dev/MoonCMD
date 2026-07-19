@@ -1,90 +1,210 @@
+-- MoonCMD Advanced (Estilo QuirkyCMD)
+local MoonCMD = {}
+MoonCMD.Prefix = ";"
+MoonCMD.Commands = {}
+MoonCMD.BannedPlayers = {} -- Tabela para armazenar bans permanentes na sessão
+
 local Players = game:GetService("Players")
-local player = Players.LocalPlayer
+local LocalPlayer = Players.LocalPlayer
+local Lighting = game:GetService("Lighting")
 
-local MoonHub = {}
-MoonHub.__index = MoonHub
+-- Criando a CmdBar (Barra de Comandos Visual)
+local ScreenGui = Instance.new("ScreenGui")
+local CmdBar = Instance.new("TextBox")
 
-function MoonHub.new(name)
-    local self = setmetatable({}, MoonHub)
-    self.Name = name or "Moon Hub"
-    self.Gui = Instance.new("ScreenGui")
-    self.Gui.Name = self.Name .. "Admin"
-    self.Gui.ResetOnSpawn = false
-    self.Gui.Parent = player:WaitForChild("PlayerGui")
+ScreenGui.Name = "MoonCMDBars"
+ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+ScreenGui.ResetOnSpawn = false
 
-    self.Main = Instance.new("Frame")
-    self.Main.Size = UDim2.new(0, 520, 0, 360)
-    self.Main.Position = UDim2.new(0.5, -260, 0.5, -180)
-    self.Main.BackgroundColor3 = Color3.fromRGB(15, 15, 18)
-    self.Main.BorderSizePixel = 0
-    self.Main.Parent = self.Gui
+CmdBar.Name = "CmdBar"
+CmdBar.Parent = ScreenGui
+CmdBar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+CmdBar.Position = UDim2.new(0.5, -250, 0, -50) -- Começa escondida no topo
+CmdBar.Size = UDim2.new(0, 500, 0, 40)
+CmdBar.Font = Enum.Font.SourceSansBold
+CmdBar.Text = ""
+CmdBar.TextColor3 = Color3.fromRGB(255, 255, 255)
+CmdBar.TextSize = 18
+CmdBar.PlaceholderText = "Digite um comando do MoonCMD aqui..."
+CmdBar.Visible = true
 
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 12)
-    corner.Parent = self.Main
+-- Alternar visibilidade da CmdBar com a tecla ";"
+game:GetService("UserInputService").InputBegan:Connect(function(input, gpe)
+    if not gpe and input.KeyCode == Enum.KeyCode.Semicolon then
+        if CmdBar.Position.Y.Offset < 0 then
+            CmdBar:TweenPosition(UDim2.new(0.5, -250, 0, 20), "Out", "Quad", 0.3, true)
+            CmdBar:CaptureFocus()
+            task.wait(0.05)
+            CmdBar.Text = "" -- Limpa o ";" digitado
+        else
+            CmdBar:TweenPosition(UDim2.new(0.5, -250, 0, -50), "In", "Quad", 0.3, true)
+            CmdBar:ReleaseFocus()
+        end
+    end
+end)
 
-    local top = Instance.new("Frame")
-    top.Size = UDim2.new(1, 0, 0, 46)
-    top.BackgroundColor3 = Color3.fromRGB(24, 24, 28)
-    top.BorderSizePixel = 0
-    top.Parent = self.Main
-
-    local title = Instance.new("TextLabel")
-    title.Size = UDim2.new(1, -20, 1, 0)
-    title.BackgroundTransparency = 1
-    title.Text = self.Name
-    title.TextColor3 = Color3.fromRGB(255, 255, 255)
-    title.Font = Enum.Font.GothamBold
-    title.TextSize = 20
-    title.Parent = top
-
-    local content = Instance.new("Frame")
-    content.Size = UDim2.new(1, 0, 1, -46)
-    content.Position = UDim2.new(0, 0, 0, 46)
-    content.BackgroundTransparency = 1
-    content.Parent = self.Main
-
-    local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(1, -20, 0, 24)
-    label.Position = UDim2.new(0, 10, 0, 12)
-    label.BackgroundTransparency = 1
-    label.Text = "Painel administrativo"
-    label.TextColor3 = Color3.fromRGB(220, 220, 220)
-    label.Font = Enum.Font.Gotham
-    label.TextSize = 16
-    label.Parent = content
-
-    local button1 = Instance.new("TextButton")
-    button1.Size = UDim2.new(0, 160, 0, 36)
-    button1.Position = UDim2.new(0, 10, 0, 50)
-    button1.BackgroundColor3 = Color3.fromRGB(250, 250, 250)
-    button1.TextColor3 = Color3.fromRGB(18, 18, 18)
-    button1.Text = "Kick jogador"
-    button1.Font = Enum.Font.GothamBold
-    button1.TextSize = 14
-    button1.BorderSizePixel = 0
-    button1.Parent = content
-
-    local corner1 = Instance.new("UICorner")
-    corner1.CornerRadius = UDim.new(0, 8)
-    corner1.Parent = button1
-
-    local button2 = Instance.new("TextButton")
-    button2.Size = UDim2.new(0, 160, 0, 36)
-    button2.Position = UDim2.new(0, 180, 0, 50)
-    button2.BackgroundColor3 = Color3.fromRGB(250, 250, 250)
-    button2.TextColor3 = Color3.fromRGB(18, 18, 18)
-    button2.Text = "Banir jogador"
-    button2.Font = Enum.Font.GothamBold
-    button2.TextSize = 14
-    button2.BorderSizePixel = 0
-    button2.Parent = content
-
-    local corner2 = Instance.new("UICorner")
-    corner2.CornerRadius = UDim.new(0, 8)
-    corner2.Parent = button2
-
-    return self
+-- Função de Notificação Integrada
+local function notify(title, text)
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = title,
+        Text = text,
+        Duration = 4
+    })
 end
 
-local library = MoonHub.new("Moon Hub")
+-- Função para achar jogador por nome parcial (ex: "vini" encontra "Vinicius")
+local function findPlayer(namePart)
+    if not namePart or namePart == "" then return nil end
+    if namePart:lower() == "me" then return LocalPlayer end
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player.Name:lower():sub(1, #namePart) == namePart:lower() or player.DisplayName:lower():sub(1, #namePart) == namePart:lower() then
+            return player
+        end
+    end
+    return nil
+end
+
+-- Registrar comandos
+function MoonCMD.AddCommand(name, callback)
+    MoonCMD.Commands[name:lower()] = callback
+end
+
+-- Processador principal
+local function runCommand(rawInput)
+    local args = {}
+    for word in rawInput:gmatch("%S+") do
+        table.insert(args, word)
+    end
+    
+    local cmdName = table.remove(args, 1)
+    if not cmdName then return end
+    if cmdName:sub(1, #MoonCMD.Prefix) == MoonCMD.Prefix then
+        cmdName = cmdName:sub(#MoonCMD.Prefix + 1)
+    end
+    cmdName = cmdName:lower()
+    
+    if MoonCMD.Commands[cmdName] then
+        pcall(function()
+            MoonCMD.Commands[cmdName](args)
+        end)
+    else
+        notify("MoonCMD", "Comando desconhecido: " .. cmdName)
+    end
+end
+
+-- Ouvinte da CmdBar ao apertar Enter
+CmdBar.FocusLost:Connect(function(enterPressed)
+    if enterPressed then
+        runCommand(CmdBar.Text)
+        CmdBar:TweenPosition(UDim2.new(0.5, -250, 0, -50), "In", "Quad", 0.3, true)
+    end
+end)
+
+-- Ouvinte do chat padrão
+LocalPlayer.Chatted:Connect(function(msg)
+    if msg:sub(1, #MoonCMD.Prefix) == MoonCMD.Prefix then
+        runCommand(msg)
+    end
+end)
+
+-- Monitor de Ban Permanente (Simulado localmente)
+Players.PlayerAdded:Connect(function(player)
+    if MoonCMD.BannedPlayers[player.UserId] then
+        -- Trava ou crasha o boneco do alvo se ele reentrar enquanto o script rodar
+        task.spawn(function()
+            while task.wait(0.5) do
+                if player.Character then player.Character:BreakJoints() end
+            end
+        end)
+    end
+end)
+
+-- ==================== LISTA DE COMANDOS CRIAÇÃO ====================
+
+-- 1. JAIL (Prende o jogador em uma jaula gerada localmente)
+MoonCMD.AddCommand("jail", function(args)
+    local target = findPlayer(args[1])
+    if target and target.Character then
+        local root = target.Character:FindFirstChild("HumanoidRootPart")
+        if root then
+            -- Cria uma jaula básica de blocos envolta do jogador
+            local jailBox = Instance.new("Part", workspace)
+            jailBox.Size = Vector3.new(8, 10, 8)
+            jailBox.CFrame = root.CFrame
+            jailBox.Transparency = 0.6
+            jailBox.Color = Color3.fromRGB(255, 0, 0)
+            jailBox.Material = Enum.Material.ForceField
+            jailBox.Anchored = true
+            jailBox.Name = "Jail_" .. target.Name
+            notify("MoonCMD", target.Name .. " foi colocado na jaula!")
+        end
+    end
+end)
+
+-- Unjail (Remove a jaula)
+MoonCMD.AddCommand("unjail", function(args)
+    local target = findPlayer(args[1])
+    if target then
+        local jail = workspace:FindFirstChild("Jail_" .. target.Name)
+        if jail then jail:Destroy() notify("MoonCMD", target.Name .. " libertado!") end
+    end
+end)
+
+-- 2. BAN (Aprimorado: Escolha Ban temporário em segundos ou Ban Permanente 'perm')
+-- Exemplo de uso na cmdbar: ;ban vini 10 (bane por 10 segundos) ou ;ban vini perm
+MoonCMD.AddCommand("ban", function(args)
+    local target = findPlayer(args[1])
+    local tempo = args[2] or "perm"
+    
+    if target and target.Character then
+        if tempo == "perm" then
+            MoonCMD.BannedPlayers[target.UserId] = true
+            target.Character:BreakJoints()
+            notify("MoonCMD", target.Name .. " foi banido PERMANENTEMENTE!")
+        else
+            local segundos = tonumber(tempo) or 5
+            target.Character.HumanoidRootPart.Anchored = true
+            notify("MoonCMD", target.Name .. " banido temporariamente por " .. segundos .. "s")
+            task.wait(segundos)
+            if target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+                target.Character.HumanoidRootPart.Anchored = false
+                notify("MoonCMD", target.Name .. " foi desbanido.")
+            end
+        end
+    end
+end)
+
+-- 3. MUDAR TEMPO (Dia / Noite)
+MoonCMD.AddCommand("day", function()
+    Lighting.ClockTime = 14
+    notify("MoonCMD", "Horario alterado para o Dia.")
+end)
+
+MoonCMD.AddCommand("night", function()
+    Lighting.ClockTime = 0
+    notify("MoonCMD", "Horario alterado para a Noite.")
+end)
+
+-- 4. SIT (Faz seu personagem ou o alvo sentar imediatamente)
+MoonCMD.AddCommand("sit", function(args)
+    local target = findPlayer(args[1]) or LocalPlayer
+    if target and target.Character and target.Character:FindFirstChildOfClass("Humanoid") then
+        target.Character:FindFirstChildOfClass("Humanoid").Sit = true
+    end
+end)
+
+-- 5. TELEPORT PLAYER (Teleporta você até um jogador)
+-- Exemplo: ;tp vini
+MoonCMD.AddCommand("tp", function(args)
+    local target = findPlayer(args[1])
+    if target and target.Character and LocalPlayer.Character then
+        local targetRoot = target.Character:FindFirstChild("HumanoidRootPart")
+        local myRoot = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if targetRoot and myRoot then
+            myRoot.CFrame = targetRoot.CFrame + Vector3.new(0, 2, 0)
+            notify("MoonCMD", "Teleportado ate " .. target.Name)
+        end
+    end
+end)
+
+notify("MoonCMD Carregado", "Aperte [ ; ] para abrir a barra de comandos rápida!")
