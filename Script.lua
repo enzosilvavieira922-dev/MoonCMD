@@ -1,4 +1,4 @@
--- Discord server for working games: https://discord.gg/GxKGmkGQD
+-- Discord server for working games: https://discord.gg/GxKGmkGQD 
 
 -- Made by Enz6
 
@@ -36,7 +36,7 @@ end
 
 -- Instances:
 
-local moonCMD = Instance.new("ScreenGui")
+local quirkyCMD = Instance.new("ScreenGui")
 local main = Instance.new("Frame")
 local menu = Instance.new("ImageButton")
 local cmdBox = Instance.new("TextBox")
@@ -58,13 +58,13 @@ local UIGradient = Instance.new("UIGradient")
 local UICorner_7 = Instance.new("UICorner")
 
 --Properties:
-moonCMD.Name = "moonCMD"
-moonCMD.Parent = gethui()
-moonCMD.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-moonCMD.ResetOnSpawn = false
+quirkyCMD.Name = "moonCMD"
+quirkyCMD.Parent = gethui()
+quirkyCMD.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+quirkyCMD.ResetOnSpawn = false
 
 main.Name = "main"
-main.Parent = moonCMD
+main.Parent = quirkyCMD
 main.AnchorPoint = Vector2.new(0.5, 0.5)
 main.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 main.BorderColor3 = Color3.fromRGB(0, 0, 0)
@@ -93,7 +93,7 @@ cmdBox.Position = UDim2.new(0.163999751, 0, 0, 0)
 cmdBox.Size = UDim2.new(0.588, 0, 0.999999642, 0)
 cmdBox.Font = Enum.Font.SourceSansBold
 cmdBox.PlaceholderColor3 = Color3.fromRGB(103, 103, 103)
-cmdBox.PlaceholderText = "MoonCMD loaded"
+cmdBox.PlaceholderText = "QuirkyCMD loaded"
 cmdBox.Text = ""
 cmdBox.TextColor3 = Color3.fromRGB(103, 103, 103)
 cmdBox.TextScaled = true
@@ -109,7 +109,7 @@ UICorner_2.CornerRadius = UDim.new(0, 16)
 UICorner_2.Parent = main
 
 remotepath.Name = "remotepath"
-remotepath.Parent = moonCMD
+remotepath.Parent = quirkyCMD
 remotepath.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 remotepath.BackgroundTransparency = 0.600
 remotepath.BorderColor3 = Color3.fromRGB(0, 0, 0)
@@ -126,7 +126,7 @@ UICorner_3.CornerRadius = UDim.new(0.400000006, 0)
 UICorner_3.Parent = remotepath
 
 mobileOpen.Name = "mobileOpen"
-mobileOpen.Parent = moonCMD
+mobileOpen.Parent = quirkyCMD
 mobileOpen.AnchorPoint = Vector2.new(1, 0)
 mobileOpen.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
 mobileOpen.BorderColor3 = Color3.fromRGB(0, 0, 0)
@@ -146,7 +146,7 @@ UICorner_4.CornerRadius = UDim.new(1, 1)
 UICorner_4.Parent = mobileOpen
 
 cmds.Name = "cmds"
-cmds.Parent = moonCMD
+cmds.Parent = quirkyCMD
 cmds.Active = true
 cmds.AnchorPoint = Vector2.new(0.5, 0.5)
 cmds.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
@@ -725,7 +725,7 @@ local rs = game:GetService("RunService")
 local rStorage = game:GetService("ReplicatedStorage")
 local players = game:GetService("Players")
 
-local gui = moonCMD or localPlayer:FindFirstChildOfClass("PlayerGui"):WaitForChild("moonCMD")
+local gui = quirkyCMD or localPlayer:FindFirstChildOfClass("PlayerGui"):WaitForChild("quirkyCMD")
 local box = main:WaitForChild("cmdBox")
 local mobileButton = gui:WaitForChild("mobileOpen")
 local cmdsFrame = gui:WaitForChild("cmds")
@@ -987,7 +987,7 @@ local hasBlurred = false
 local notificationDismissed = false
 
 local appearSoundId = "rbxassetid://88591874532589" -- you can change this to your desired sound with an id. cool right?
-local discordInvite = "https://discord.gg/GxKGmkGQD"-- same goes for this link, but i'd prefer if you keep it as quirky ;)
+local discordInvite = "https://discord.gg/9w7R9HsBvJ"-- same goes for this link, but i'd prefer if you keep it as quirky ;)
 
 local function playAppearSound()
 	local sound = Instance.new("Sound")
@@ -1187,12 +1187,12 @@ local function listFiles() -- really wish i didnt have to do this
 end
 
 local function getGameList()
-	if not isfile("moon games.json") then
-		writefile("moon games.json", "[]") 
+	if not isfile("quirky games.json") then
+		writefile("quirky games.json", "[]") 
 		return {} 
 	end
 
-	local content = readfile("moon games.json")
+	local content = readfile("quirky games.json")
 	return game:GetService("HttpService"):JSONDecode(content)
 end
 
@@ -1584,7 +1584,7 @@ addCommand("unowner", function(plrs)
 	end
 end, {"removeowner", "deop"}, 3)
 addCommand("ranks", function()
-	local printString = "\nMoonCMD ranks:\n"
+	local printString = "\nQuirkyCMD ranks:\n"
 	for name,level in pairs(privilegeLevels) do
 		if level == 0 then continue end
 		local plr = players:FindFirstChild(name)
@@ -1598,7 +1598,7 @@ addCommand("ranks", function()
 end, {"admins", "owners"}, 3)
 
 addCommand("aliases", function()
-	local printString = "\nMoonCMD command aliases:\n"
+	local printString = "\nQuirkyCMD command aliases:\n"
 	for i,v in pairs(commands) do
 		local aliases = v.aliases
 		if #aliases == 0 then continue end
